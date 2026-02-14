@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BTC Bot Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
+        h1 { color: #00ffcc; }
+        .card { background: #222; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<h1>BTC Profit Bot Monitor</h1>
+
+<div class="card">
+    <h2>Latest BTC Price</h2>
+    <p id="price">Loading...</p>
+</div>
+
+<div class="card">
+    <h2>Recent Logs</h2>
+    <div id="logs">Loading...</div>
+</div>
+
+<script>
+    const SUPABASE_URL = "https://unofuugcsccaxaxwpauv.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVub2Z1dWdjc2NjYXhheHdwYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NDMzMzQsImV4cCI6MjA4NjUxOTMzNH0.6XQmDbaPuTKpKhCOWcHUJU9Yg45JiqNauk0k34EblkY";
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadData() {
+
+        // Latest price
+        const { data: prices } = await supabase
+            .from('btc_snapshots')
+            .select('*')
+            .order('id', { ascending: false })
+            .limit(1);
+
+        if (prices.length > 0) {
+            document.getElementById("price").innerText = prices[0].price;
+        }
+
+        // Recent logs
+        const { data: logs } = await supabase
+            .from('btc_snapshots')
+            .select('*')
+            .order('id', { ascending: false })
+            .limit(10);
+
+        let html = "";
+        logs.forEach(log => {
+            html += `<p>${log.inserted_at} → ${log.price}</p>`;
+        });
+
+        document.getElementById("logs").innerHTML = html;
+    }
+
+    loadData();
+</script>
+
+</body>
+</html>
