@@ -7,11 +7,17 @@
         body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
         h1 { color: #00ffcc; }
         .card { background: #222; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .status { font-weight: bold; color: #00ff00; }
     </style>
 </head>
 <body>
 
-<h1>BTC Profit Bot Monitor</h1>
+<h1>BTC 1H Bot Monitor</h1>
+
+<div class="card">
+    <h2>Status</h2>
+    <p class="status">LIVE</p>
+</div>
 
 <div class="card">
     <h2>Latest BTC Price</h2>
@@ -19,42 +25,38 @@
 </div>
 
 <div class="card">
-    <h2>Recent Logs</h2>
-    <div id="logs">Loading...</div>
+    <h2>Last Update</h2>
+    <p id="lastUpdate">Loading...</p>
+</div>
+
+<div class="card">
+    <h2>Total Snapshots</h2>
+    <p id="totalCount">Loading...</p>
 </div>
 
 <script>
-    const SUPABASE_URL = "https://unofuugcsccaxaxwpauv.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVub2Z1dWdjc2NjYXhheHdwYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NDMzMzQsImV4cCI6MjA4NjUxOTMzNH0.6XQmDbaPuTKpKhCOWcHUJU9Yg45JiqNauk0k34EblkY";
+    const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+    const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY";
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function loadData() {
 
-        // Latest price
-        const { data: prices } = await supabase
+        const { data, error } = await client
             .from('btc_snapshots')
             .select('*')
-            .order('id', { ascending: false })
-            .limit(1);
+            .order('id', { ascending: false });
 
-        if (prices.length > 0) {
-            document.getElementById("price").innerText = prices[0].price;
+        if (error) {
+            console.error(error);
+            return;
         }
 
-        // Recent logs
-        const { data: logs } = await supabase
-            .from('btc_snapshots')
-            .select('*')
-            .order('id', { ascending: false })
-            .limit(10);
-
-        let html = "";
-        logs.forEach(log => {
-            html += `<p>${log.inserted_at} → ${log.price}</p>`;
-        });
-
-        document.getElementById("logs").innerHTML = html;
+        if (data.length > 0) {
+            document.getElementById("price").innerText = data[0].price;
+            document.getElementById("lastUpdate").innerText = data[0].inserted_at;
+            document.getElementById("totalCount").innerText = data.length;
+        }
     }
 
     loadData();
