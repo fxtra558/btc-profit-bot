@@ -2,4 +2,5 @@ pandas
 numpy
 ccxt
 ta
+requests
 supabase
